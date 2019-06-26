@@ -15,7 +15,7 @@ public class BookUpdateSetter implements PreparedStmtSetter {
     }
 
     public String getSql() {
-        return "update Book set Name = ?, Description = ?, Published = ?, Year = ?, where Id = ?";
+        return "update Book set Name = ?, Description = ?, Published = ?, Year = ? where Id = ?";
     }
 
     public void setParams(PreparedStatement stmt) throws SQLException {

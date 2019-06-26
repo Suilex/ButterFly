@@ -53,14 +53,15 @@ public class DBConnector {
     public <T>List<T> select(Selector<T> selector) {
         List<T> items = new ArrayList<>();
         Connection dbConnection = getConnection();
-        Statement statement = null;
+        PreparedStatement statement = null;
         try {
-            statement = dbConnection.createStatement();
+            statement = dbConnection.prepareStatement(selector.getSql());
+            selector.setParams(statement);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         try {
-            ResultSet rs = statement.executeQuery(selector.getSql());
+            ResultSet rs = statement.executeQuery();
             while (rs.next()){
                 items.add(selector.convert(rs));
             }

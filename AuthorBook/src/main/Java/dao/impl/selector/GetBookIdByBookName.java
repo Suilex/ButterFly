@@ -7,22 +7,26 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class GetAllBooksSelector implements Selector<Book> {
+public class GetBookIdByBookName implements Selector<Book> {
+
+    private String bookName;
+
+    public GetBookIdByBookName(String bookName) {
+        this.bookName = bookName;
+    }
+
     @Override
     public String getSql() {
-        return "Select * from Book";
+        return "Select Id from Book where Name = ?";
     }
+
+
 
     @Override
     public Book convert(ResultSet rs) {
         Book book = new Book();
         try {
             book.setId(rs.getLong("Id"));
-            book.setName(rs.getString("Name"));
-            book.setPublished(rs.getString("Published"));
-            book.setYear(rs.getLong("Year"));
-            book.setDescription(rs.getString("Description"));
-            book.setAuthorId(rs.getLong("AuthorId"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -31,8 +35,10 @@ public class GetAllBooksSelector implements Selector<Book> {
 
     @Override
     public void setParams(PreparedStatement statement) {
-
+        try {
+            statement.setString(1, bookName);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
-
-
 }

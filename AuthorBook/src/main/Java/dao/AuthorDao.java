@@ -11,13 +11,12 @@ public interface AuthorDao {
     void add(Author author);
 
     //read
-   // void Show (Author author, String[] arr) throws SQLException;
+    List<Author> getAll();
 
-    //delete
+    List<Author> getAllByBookId(long bookName);
+
     void delete(Author author) throws SQLException;
 
     //update
     void update(Author author) throws SQLException;
-
-    List<Author> getAll();
 }

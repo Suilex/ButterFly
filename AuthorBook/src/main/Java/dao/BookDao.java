@@ -21,4 +21,8 @@ public interface BookDao {
 
 
     List<Book> getAll();
+
+    List<Book> getBooksByAuthor(long authorName);
+
+    long getBookIdByBookName(String bookName);
 }

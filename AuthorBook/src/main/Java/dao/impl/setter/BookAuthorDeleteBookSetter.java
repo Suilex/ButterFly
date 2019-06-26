@@ -15,10 +15,10 @@ public class BookAuthorDeleteBookSetter implements PreparedStmtSetter {
     }
 
     public String getSql() {
-        return "delete from AuthorBook where BookId = ?";
+        return "delete from BookAuthor where BookId = ?";
     }
 
     public void setParams(PreparedStatement stmt) throws SQLException {
-        stmt.setLong(1, bookAuthor.getAuthorId());
+        stmt.setLong(1, bookAuthor.getBookId());
     }
 }

@@ -2,36 +2,47 @@ import dao.connect.DBConnector;
 import dao.impl.AuthorDaoImpl;
 import dao.impl.BookAuthorDaoImpl;
 import dao.impl.BookDaoImpl;
+import entity.BookAuthor;
 import service.ShowCommand;
 import entity.Author;
 import entity.Book;
-import entity.BookAuthor;
 
 import java.util.Scanner;
 
-public class Inter {
+class Inter {
+
+    private long id;
+    private long year;
+    private long authorId;
+    private String name;
+    private String firstName;
+    private String lastName;
+    private String published;
+    private String description;
+
+    private static final Scanner scanner = new Scanner(System.in);
 
     private static void menu(){
         System.out.println("------------------------------");
-        System.out.println("add Author, press key: 1");
-        System.out.println("Edit Author, press key: 2");
-        System.out.println("delete Author, press key: 3");
+        System.out.println("Add Author, press key: 1");
+        System.out.println("Update Author, press key: 2");
+        System.out.println("Delete Author, press key: 3");
         System.out.println("Show All Author, press key: 4");
         System.out.println("------------------------------");
-        System.out.println("add Book, press key: 5");
-        System.out.println("Edit Book, press key: 6");
-        System.out.println("delete Book, press key: 7");
-        System.out.println("Show All Book, press key: 8");
+        System.out.println("Add Book, press key: 5");
+        System.out.println("Update Book, press key: 6");
+        System.out.println("Delete Book, press key: 7");
+        System.out.println("Show all Book, press key: 8");
         System.out.println("------------------------------");
-        System.out.println("add link to AuthorBook, press key: 9");
-        System.out.println("delete link to AuthorBook, press key: 10");
+        System.out.println("Show all Author by Book id: 9");
+        System.out.println("Show all Book by Author id: 10");
         System.out.println("------------------------------");
         System.out.println("Exit, press key: 11");
         System.out.println("------------------------------");
         System.out.println();
     }
 
-    private static boolean ans(){
+    private static boolean comingSoon(){
         while (true) {
             System.out.println();
             System.out.println("continue? y/n");
@@ -42,164 +53,176 @@ public class Inter {
         }
     }
 
-    private static int insertId(String Names){
+    private static int getParam(String Names){
         System.out.println("Enter "+ Names +": ");
         return scanner.nextInt();
     }
 
-    private static String InsertName(String Names){
+    private static String getName(String Names){
         System.out.println("Enter "+ Names +": ");
         return scanner.next();
     }
 
-    private static int deleteId(){
-        System.out.println("Enter Id: ");
-        return scanner.nextInt();
+    private void addAuthor(AuthorDaoImpl authorDaoImpl) {
+        Author author = new Author();
+        firstName = getName("FirstName");
+        lastName = getName("lastName");
+        year = getParam("year");
+        author.setFirstName(firstName);
+        author.setLastName(lastName);
+        author.setYear(year);
+        authorDaoImpl.add(author);
     }
 
-    private static int editId(String Names){
-        System.out.println("Enter edit " + Names + ": ");
-        return scanner.nextInt();
+    private void updateAuthor(AuthorDaoImpl authorDaoImpl) {
+        Author author = new Author();
+        id = getParam("Id");
+        firstName = getName("FirstName");
+        lastName = getName("lastName");
+        year = getParam("year");
+        author.setFirstName(firstName);
+        author.setLastName(lastName);
+        author.setYear(year);
+        author.setId(id);
+        authorDaoImpl.update(author);
     }
 
-    private static String editName(String Names){
-        System.out.println("Enter edit " + Names + ": ");
-        return scanner.next();
+    private void deleteAuthor(AuthorDaoImpl authorDaoImpl, BookAuthorDaoImpl bookAuthorDaoImpl) {
+        Author author = new Author();
+        BookAuthor bookAuthor = new BookAuthor();
+        id = getParam("id");
+        author.setId(id);
+        authorDaoImpl.delete(author);
+        bookAuthor.setAuthorId(id);
+        bookAuthorDaoImpl.deleteAuthor(bookAuthor);
     }
 
-    private static final Scanner scanner = new Scanner(System.in);
+    private void outputAuthor() {
+        System.out.println();
+        new ShowCommand<Author>()
+                .show(new AuthorDaoImpl(new DBConnector()).getAll());
+        System.out.println();
+    }
 
-    public void ent() {
+    private void outputAuthorsByBookId() {
+        outputBook();
+        id = getParam("BookId");
+        new ShowCommand<Author>()
+                .show(new AuthorDaoImpl(new DBConnector()).getAllByBookId(id));
+    }
+
+    private void addBook(BookDaoImpl bookDaoImpl, BookAuthorDaoImpl bookAuthorDaoImpl) {
+        Book book = new Book();
+        BookAuthor bookAuthor = new BookAuthor();
+        name = getName("name");
+        description = getName("description");
+        published = getName("published");
+        year = getParam("year");
+        outputAuthor();
+        authorId = getParam("authorId");
+        book.setName(name);
+        book.setDescription(description);
+        book.setPublished(published);
+        book.setYear(year);
+        book.setAuthorId(authorId);
+        bookDaoImpl.add(book);
+
+        bookAuthor.setAuthorId(authorId);
+        bookAuthor.setBookId(new BookDaoImpl(new DBConnector()).getBookIdByBookName(name));
+        bookAuthorDaoImpl.add(bookAuthor);
+    }
+
+    private void updateBook(BookDaoImpl bookDaoImpl) {
+        Book book = new Book();
+        id = getParam("id");
+        name = getName("name");
+        description = getName("description");
+        published = getName("published");
+        year = getParam("year");
+        book.setName(name);
+        book.setDescription(description);
+        book.setPublished(published);
+        book.setYear(year);
+        book.setId(id);
+        bookDaoImpl.update(book);
+    }
+
+    private void deleteBook(BookDaoImpl bookDaoImpl, BookAuthorDaoImpl bookAuthorDaoImpl) {
+        Book book = new Book();
+        BookAuthor bookAuthor = new BookAuthor();
+        id = getParam("id");
+        book.setId(id);
+        bookDaoImpl.delete(book);
+        bookAuthor.setBookId(id);
+        bookAuthorDaoImpl.deleteBook(bookAuthor);
+    }
+
+    private void outputBook() {
+        System.out.println();
+        new ShowCommand<Book>()
+                .show(new BookDaoImpl(new DBConnector()).getAll());
+        System.out.println();
+    }
+
+    private void outputBooksByAuthorId() {
+        outputAuthor();
+        id = getParam("AuthorId");
+        new ShowCommand<Book>()
+                .show(new BookDaoImpl(new DBConnector()).getBooksByAuthor(id));
+    }
+
+    void setAction() {
         DBConnector conn = new DBConnector();
-
         AuthorDaoImpl authorDaoImpl = new AuthorDaoImpl(conn);
         BookDaoImpl bookDaoImpl = new BookDaoImpl(conn);
         BookAuthorDaoImpl bookAuthorDaoImpl = new BookAuthorDaoImpl(conn);
 
         while (true) {
-            Author author = new Author();
-            Book book = new Book();
-            BookAuthor bookAuthor = new BookAuthor();
-
             menu();
             int change = scanner.nextInt();
             switch (change) {
                 case 1:
-                    String firstName = InsertName("FirstName");
-                    String lastName = InsertName("lastName");
-                    int year = insertId("year");
-                    author.setFirstName(firstName);
-                    author.setLastName(lastName);
-                    author.setYear(year);
-                    authorDaoImpl.add(author);
-                    if(!ans()) return;
+                    addAuthor(authorDaoImpl);
+                    if(!comingSoon()) return;
                     break;
                 case 2:
-                    int id = editId("Id");
-                    firstName = editName("FirstName");
-                    lastName = editName("lastName");
-                    year = editId("year");
-                    author.setFirstName(firstName);
-                    author.setLastName(lastName);
-                    author.setYear(year);
-                    author.setId(id);
-                    authorDaoImpl.update(author);
-                    if(!ans()) return;
+                    updateAuthor(authorDaoImpl);
+                    if(!comingSoon()) return;
                     break;
                 case 3:
-                    id = deleteId();
-                    author.setId(id);
-                    authorDaoImpl.delete(author);
-                    if(!ans()) return;
+                    deleteAuthor(authorDaoImpl, bookAuthorDaoImpl);
+                    if(!comingSoon()) return;
                     break;
                 case 4:
-                    new ShowCommand<Author>()
-                            .show(new AuthorDaoImpl(new DBConnector()).getAll());
-                    if(!ans()) return;
+                    outputAuthor();
+                    if(!comingSoon()) return;
                     break;
                 case 5:
-                    String name = InsertName("name");
-                    String description = InsertName("description");
-                    String puplished = InsertName("puplished");
-                    year = insertId("year");
-                    int authorId = insertId("authorId");
-                    book.setName(name);
-                    book.setDescription(description);
-                    book.setPublished(puplished);
-                    book.setYear(year);
-                    book.setAuthorId(authorId);
-                    bookDaoImpl.add(book);
-                    if(!ans()) return;
+                    addBook(bookDaoImpl, bookAuthorDaoImpl);
+                    if(!comingSoon()) return;
                     break;
                 case 6:
-                    id = editId("Id");
-                    name = editName("name");
-                    description = editName("description");
-                    puplished = editName("puplished");
-                    year = editId("year");
-                    authorId = insertId("authorId");
-                    book.setName(name);
-                    book.setDescription(description);
-                    book.setPublished(puplished);
-                    book.setYear(year);
-                    book.setAuthorId(authorId);
-                    book.setId(id);
-                    bookDaoImpl.update(book);
-                    if(!ans()) return;
+                    updateBook(bookDaoImpl);
+                    if(!comingSoon()) return;
                     break;
                 case 7:
-                    id = deleteId();
-                    book.setId(id);
-                    bookDaoImpl.delete(book);
-                    if(!ans()) return;
+                    deleteBook(bookDaoImpl, bookAuthorDaoImpl);
+                    if(!comingSoon()) return;
                     break;
                 case 8:
-                    new ShowCommand<Book>()
-                            .show(new BookDaoImpl(new DBConnector()).getAll());
-                    if(!ans()) return;
+                    outputBook();
+                    if(!comingSoon()) return;
                     break;
                 case 9:
-                    id = editId("AuthorId");
-                    int id2 = editId("BookId");
-                    bookAuthor.setAuthorId(id);
-                    bookAuthor.setBookId(id2);
-                    bookAuthorDaoImpl.add(bookAuthor);
+                    outputBooksByAuthorId();
+                    if(!comingSoon()) return;
                     break;
                 case 10:
-                    int a;
-                    while (true) {
-                        System.out.println("Who do you want to remove? (Author: 1, Book: 2)");
-                        a = scanner.nextInt();
-                        if (a == 1 || a == 2) break;
-                    }
-                    id = editId("Id");
-                    if (a == 1) {
-                        bookAuthor.setAuthorId(id);
-                        bookAuthorDaoImpl.deleteAuthor(bookAuthor);
-                    }
-                    else {
-                        bookAuthor.setBookId(id);
-                        bookAuthorDaoImpl.deleteBook(bookAuthor);
-                    }
+                    outputAuthorsByBookId();
+                    if(!comingSoon()) return;
                     break;
                 case 11:
                     return;
-                case 12:
-                    id = editId("Id");
-                    name = editName("Name BD");
-                    new ShowCommand<BookAuthor>().show(new BookAuthorDaoImpl(new DBConnector()).getAllByParamNameAndValue(id, name));
-                    if(!ans()) return;
-                    break;
-                case 13:
-                    new ShowCommand<BookAuthor>().show(new BookAuthorDaoImpl(new DBConnector()).getAll());
-                    if(!ans()) return;
-                    break;
-                case 14:
-                    id = editId("Id");
-                    new ShowCommand<Author>()
-                            .show(new AuthorDaoImpl(new DBConnector()).getAllByBookId(id));
-                    if(!ans()) return;
-                    break;
             }
         }
     }
