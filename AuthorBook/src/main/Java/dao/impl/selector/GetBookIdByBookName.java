@@ -20,8 +20,6 @@ public class GetBookIdByBookName implements Selector<Book> {
         return "Select Id from Book where Name = ?";
     }
 
-
-
     @Override
     public Book convert(ResultSet rs) {
         Book book = new Book();

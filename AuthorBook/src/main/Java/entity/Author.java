@@ -1,6 +1,5 @@
 package entity;
 
-
 public class Author{
 
     private long id;

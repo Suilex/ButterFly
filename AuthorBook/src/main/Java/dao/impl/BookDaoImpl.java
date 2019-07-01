@@ -41,21 +41,23 @@ public class BookDaoImpl implements BookDao {
     }
 
     @Override
-    public List<Book> getBooksByAuthor(long authorName) {
+    public long getBookIdByBookName(String bookName) {
+        List<Book> books = db.select(new GetBookIdByBookName(bookName));
+        return books.get(0).getId();
+    }
+
+    @Override
+    public List<Book> getBooksByAuthor(long authorId) {
         List<BookAuthor> bookAuthors;
         List<Book> books2, books = new ArrayList<>();
-        bookAuthors = db.select(new GetAuthorBookByAuthorIdSelector(authorName));
+        bookAuthors = db.select(new GetAuthorBookByAuthorIdSelector(authorId));
+
         for (BookAuthor item : bookAuthors) {
             books2 = db.select(new GetBooksByBookIdSelector(item.getBookId()));
             books.addAll(books2);
         }
-        return books;
-    }
 
-    @Override
-    public long getBookIdByBookName(String bookName) {
-        List<Book> books = db.select(new GetBookIdByBookName(bookName));
-        return books.get(0).getId();
+        return books;
     }
 
 

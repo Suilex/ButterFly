@@ -40,10 +40,10 @@ public class AuthorDaoImpl implements AuthorDao {
     }
 
     @Override
-    public List<Author> getAllByBookId(long bookName) {
+    public List<Author> getAllByBookId(long bookId) {
         List<BookAuthor> bookAuthors;
         List<Author> authors2, authors = new ArrayList<>();
-        bookAuthors = db.select(new GetAuthorBookByBookIdSelector(bookName));
+        bookAuthors = db.select(new GetAuthorBookByBookIdSelector(bookId));
 
         for (BookAuthor item : bookAuthors) {
             authors2 = db.select(new GetAuthorsByAuthorIdSelector(item.getAuthorId()));

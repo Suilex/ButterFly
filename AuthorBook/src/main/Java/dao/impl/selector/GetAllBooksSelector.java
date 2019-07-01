@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class GetAllBooksSelector implements Selector<Book> {
+
     @Override
     public String getSql() {
         return "Select * from Book";
@@ -31,8 +32,5 @@ public class GetAllBooksSelector implements Selector<Book> {
 
     @Override
     public void setParams(PreparedStatement statement) {
-
     }
-
-
 }

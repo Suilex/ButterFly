@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class GetAllAuthorSelector implements Selector<Author> {
+
     @Override
     public String getSql() {
         return "Select * from Author";
@@ -29,6 +30,5 @@ public class GetAllAuthorSelector implements Selector<Author> {
 
     @Override
     public void setParams(PreparedStatement statement) {
-
     }
 }

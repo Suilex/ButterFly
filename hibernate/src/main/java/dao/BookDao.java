@@ -7,14 +7,12 @@ import java.util.List;
 public interface BookDao {
 
     //add
-    void add (Book book);
+    void add (Book book, long authorId);
 
     //read
-    List<Book> getAll();
+    List getAll();
 
-    List<Book> getBooksByAuthor(long authorId);
-
-    long getBookIdByBookName(String bookName);
+    List<Book> getAllByAuthorId(long authorId);
 
     //delete
     void delete(Book book);

@@ -10,7 +10,7 @@ public interface AuthorDao {
     void add(Author author);
 
     //read
-    List<Author> getAll();
+    List getAll();
 
     List<Author> getAllByBookId(long bookId);
 

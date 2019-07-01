@@ -9,10 +9,10 @@ import java.sql.SQLException;
 
 public class GetAuthorBookByAuthorIdSelector implements Selector<BookAuthor> {
 
-    private long authorName;
+    private long authorId;
 
-    public GetAuthorBookByAuthorIdSelector(long authorName) {
-        this.authorName = authorName;
+    public GetAuthorBookByAuthorIdSelector(long authorId) {
+        this.authorId = authorId;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class GetAuthorBookByAuthorIdSelector implements Selector<BookAuthor> {
     @Override
     public void setParams(PreparedStatement statement) {
         try {
-            statement.setLong(1, authorName);
+            statement.setLong(1, authorId);
         } catch (SQLException e) {
             e.printStackTrace();
         }

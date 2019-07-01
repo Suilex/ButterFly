@@ -1,20 +1,21 @@
+package domain;
+
+import connect.HibernateConnect;
 import dao.BookDao;
-import dao.connect.DBConnector;
 import dao.impl.AuthorDaoImpl;
-import dao.impl.BookAuthorDaoImpl;
 import dao.impl.BookDaoImpl;
 import entity.Author;
 import entity.Book;
-import entity.BookAuthor;
+import org.hibernate.Session;
 import service.ShowCommand;
 
 import java.util.Scanner;
 
 class Inter {
-
     private long id;
     private long year;
     private long authorId;
+    private long bookId;
     private String name;
     private String firstName;
     private String lastName;
@@ -49,8 +50,8 @@ class Inter {
             System.out.println("continue? y/n");
             String ans = scanner.next();
             System.out.println();
-            if (ans.equals("n")) return false;
-            if (ans.equals("y")) return true;
+            if (ans.equals("n")) return true;
+            if (ans.equals("y")) return false;
         }
     }
 
@@ -72,6 +73,7 @@ class Inter {
         author.setFirstName(firstName);
         author.setLastName(lastName);
         author.setYear(year);
+
         authorDaoImpl.add(author);
     }
 
@@ -88,33 +90,22 @@ class Inter {
         authorDaoImpl.update(author);
     }
 
-    private void deleteAuthor(AuthorDaoImpl authorDaoImpl, BookAuthorDaoImpl bookAuthorDaoImpl) {
+    private void deleteAuthor(AuthorDaoImpl authorDaoImpl) {
         Author author = new Author();
-        BookAuthor bookAuthor = new BookAuthor();
         id = getParam("id");
         author.setId(id);
         authorDaoImpl.delete(author);
-        bookAuthor.setAuthorId(id);
-        bookAuthorDaoImpl.deleteAuthor(bookAuthor);
     }
 
     private void outputAuthor() {
         System.out.println();
-        new ShowCommand<Author>()
-                .show(new AuthorDaoImpl(new DBConnector()).getAll());
+        new ShowCommand<>()
+                .show(new AuthorDaoImpl(new HibernateConnect()).getAll());
         System.out.println();
     }
 
-    private void outputAuthorsByBookId() {
-        outputBook();
-        id = getParam("BookId");
-        new ShowCommand<Author>()
-                .show(new AuthorDaoImpl(new DBConnector()).getAllByBookId(id));
-    }
-
-    private void addBook(BookDaoImpl bookDaoImpl, BookAuthorDaoImpl bookAuthorDaoImpl) {
+    private void addBook(BookDaoImpl bookDaoImpl) {
         Book book = new Book();
-        BookAuthor bookAuthor = new BookAuthor();
         name = getName("name");
         description = getName("description");
         published = getName("published");
@@ -125,12 +116,8 @@ class Inter {
         book.setDescription(description);
         book.setPublished(published);
         book.setYear(year);
-        book.setAuthorId(authorId);
-        bookDaoImpl.add(book);
 
-        bookAuthor.setAuthorId(authorId);
-        bookAuthor.setBookId(new BookDaoImpl(new DBConnector()).getBookIdByBookName(name));
-        bookAuthorDaoImpl.add(bookAuthor);
+        bookDaoImpl.add(book, authorId);
     }
 
     private void updateBook(BookDao bookDao) {
@@ -148,35 +135,38 @@ class Inter {
         bookDao.update(book);
     }
 
-    private void deleteBook(BookDaoImpl bookDaoImpl, BookAuthorDaoImpl bookAuthorDaoImpl) {
+    private void deleteBook(BookDaoImpl bookDaoImpl) {
         Book book = new Book();
-        BookAuthor bookAuthor = new BookAuthor();
         id = getParam("id");
         book.setId(id);
         bookDaoImpl.delete(book);
-        bookAuthor.setBookId(id);
-        bookAuthorDaoImpl.deleteBook(bookAuthor);
     }
 
     private void outputBook() {
         System.out.println();
-        new ShowCommand<Book>()
-                .show(new BookDaoImpl(new DBConnector()).getAll());
+        new ShowCommand<>()
+                .show(new BookDaoImpl(new HibernateConnect()).getAll());
         System.out.println();
     }
 
+    private void outputAuthorsByBookId() {
+        bookId = getParam("bookId");
+        new ShowCommand<Author>()
+                .show(new AuthorDaoImpl(new HibernateConnect()).getAllByBookId(bookId));
+    }
+
     private void outputBooksByAuthorId() {
-        outputAuthor();
-        id = getParam("AuthorId");
+        authorId = getParam("authorId");
         new ShowCommand<Book>()
-                .show(new BookDaoImpl(new DBConnector()).getBooksByAuthor(id));
+                .show(new BookDaoImpl(new HibernateConnect()).getAllByAuthorId(authorId));
     }
 
     void setAction() {
-        DBConnector conn = new DBConnector();
-        AuthorDaoImpl authorDaoImpl = new AuthorDaoImpl(conn);
-        BookDaoImpl bookDaoImpl = new BookDaoImpl(conn);
-        BookAuthorDaoImpl bookAuthorDaoImpl = new BookAuthorDaoImpl(conn);
+        Session session = HibernateConnect.getSessionFactory().openSession();
+        session.beginTransaction();
+
+        AuthorDaoImpl authorDaoImpl = new AuthorDaoImpl(new HibernateConnect());
+        BookDaoImpl bookDaoImpl = new BookDaoImpl(new HibernateConnect());
 
         while (true) {
             menu();
@@ -184,43 +174,43 @@ class Inter {
             switch (change) {
                 case 1:
                     addAuthor(authorDaoImpl);
-                    if(!comingSoon()) return;
+                    if(comingSoon()) return;
                     break;
                 case 2:
                     updateAuthor(authorDaoImpl);
-                    if(!comingSoon()) return;
+                    if(comingSoon()) return;
                     break;
                 case 3:
-                    deleteAuthor(authorDaoImpl, bookAuthorDaoImpl);
-                    if(!comingSoon()) return;
+                    deleteAuthor(authorDaoImpl);
+                    if(comingSoon()) return;
                     break;
                 case 4:
                     outputAuthor();
-                    if(!comingSoon()) return;
+                    if(comingSoon()) return;
                     break;
                 case 5:
-                    addBook(bookDaoImpl, bookAuthorDaoImpl);
-                    if(!comingSoon()) return;
+                    addBook(bookDaoImpl);
+                    if(comingSoon()) return;
                     break;
                 case 6:
                     updateBook(bookDaoImpl);
-                    if(!comingSoon()) return;
+                    if(comingSoon()) return;
                     break;
                 case 7:
-                    deleteBook(bookDaoImpl, bookAuthorDaoImpl);
-                    if(!comingSoon()) return;
+                    deleteBook(bookDaoImpl);
+                    if(comingSoon()) return;
                     break;
                 case 8:
                     outputBook();
-                    if(!comingSoon()) return;
+                    if(comingSoon()) return;
                     break;
                 case 9:
                     outputBooksByAuthorId();
-                    if(!comingSoon()) return;
+                    if(comingSoon()) return;
                     break;
                 case 10:
                     outputAuthorsByBookId();
-                    if(!comingSoon()) return;
+                    if(comingSoon()) return;
                     break;
                 case 11:
                     return;
@@ -228,4 +218,3 @@ class Inter {
         }
     }
 }
-
